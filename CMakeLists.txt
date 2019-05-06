@@ -7,5 +7,5 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(OpenCV REQUIRED)
-add_executable(${PROJECT_NAME} main.cc)
+add_executable(${PROJECT_NAME} filter.cc camera.cc main.cc)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
