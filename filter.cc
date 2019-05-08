@@ -1,11 +1,16 @@
 #include "filter.h"
 #include <algorithm>
-#include <stdexcept>
 #include <numeric>
+#include <stdexcept>
 
 namespace hanz {
-  void Filter::calculate_thresholds(const cv::Mat& sample1, const cv::Mat& sample2) {
+  Filter::Filter() {
+    if (!face_finder.load(classifier_path)) {
+      throw std::runtime_error("Failed to load classifier model");
+    }
+  }
 
+  void Filter::calculate_thresholds(cv::Mat& sample1, cv::Mat& sample2) {
     auto HSV_min = cv::mean(sample1);
     auto HSV_max = cv::mean(sample2);
 
@@ -17,7 +22,7 @@ namespace hanz {
     v_high_threshold = HSV_max[2] + offset_high_threshold;
   }
 
-  void Filter::calibrate(const cv::Mat& image) {
+  void Filter::calibrate(cv::Mat& image) {
     cv::Mat HSV_input;
     cv::cvtColor(image, HSV_input, cv::COLOR_BGR2HSV);
     cv::Mat sample1 = cv::Mat(HSV_input, skin_color_rect_1);
@@ -27,7 +32,7 @@ namespace hanz {
     calibrated = true;
   }
 
-  void Filter::sample_skin_color(const cv::Mat& image) {
+  void Filter::sample_skin_color(cv::Mat& image) {
     int frame_width{image.size().width};
     int frame_height{image.size().height};
 
@@ -39,7 +44,7 @@ namespace hanz {
     cv::rectangle(image, skin_color_rect_2, RECT_COLOR);
   }
 
-  void Filter::process(const cv::Mat& image) {
+  cv::Mat Filter::process(cv::Mat& image) const {
     cv::Mat skin_mask;
     if (!calibrated) {
       throw std::runtime_error("Must calibrate before processing an image!");
@@ -48,10 +53,34 @@ namespace hanz {
     auto low_HSV = cv::Scalar(h_low_threshold, s_low_threshold, v_low_threshold);
     auto high_HSV = cv::Scalar(h_high_threshold, s_high_threshold, v_high_threshold);
     cv::inRange(image, low_HSV, high_HSV, skin_mask);
+
+    morph_image(skin_mask, cv::MORPH_ELLIPSE, {3, 3});
+    cv::dilate(skin_mask, skin_mask, cv::Mat(), cv::Point(-1, -1), 3);
+
+    return skin_mask;
   }
 
-  void Filter::morph_image(cv::Mat binary_image, int kernel_shape, cv::Point kernel_size) {
+  void Filter::morph_image(cv::Mat binary_image, int kernel_shape, cv::Point kernel_size) const {
     const auto structuring_element = cv::getStructuringElement(kernel_shape, kernel_size);
     cv::morphologyEx(binary_image, binary_image, cv::MORPH_OPEN, structuring_element);
+  }
+
+  void Filter::remove_face(cv::Mat& input_image, cv::Mat& output_image) {
+    std::vector<cv::Rect> faces;
+    cv::Mat gray_frame;
+
+    cv::cvtColor(input_image, gray_frame, cv::COLOR_BGR2GRAY);
+    face_finder.detectMultiScale(
+        gray_frame, faces, 1.1, 2, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(120, 120));
+
+    for (size_t i = 0; i < faces.size(); ++i) {
+      // Add rectangles in each detected face location
+      cv::rectangle(
+          output_image,
+          cv::Point(faces[i].x, faces[i].y),
+          cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height),
+          cv::Scalar(0, 0, 0),
+          -1);
+    }
   }
 } // namespace hanz
