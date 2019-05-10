@@ -1,5 +1,6 @@
 #include "filter.h"
 #include <algorithm>
+#include <iostream>
 #include <numeric>
 #include <stdexcept>
 
@@ -44,7 +45,7 @@ namespace hanz {
     cv::rectangle(image, skin_color_rect_2, RECT_COLOR);
   }
 
-  cv::Mat Filter::process(cv::Mat& image) const {
+  cv::Mat Filter::process(cv::Mat& image) {
     cv::Mat skin_mask;
     if (!calibrated) {
       throw std::runtime_error("Must calibrate before processing an image!");
@@ -60,7 +61,7 @@ namespace hanz {
     return skin_mask;
   }
 
-  void Filter::morph_image(cv::Mat binary_image, int kernel_shape, cv::Point kernel_size) const {
+  void Filter::morph_image(cv::Mat binary_image, int kernel_shape, cv::Point kernel_size) {
     const auto structuring_element = cv::getStructuringElement(kernel_shape, kernel_size);
     cv::morphologyEx(binary_image, binary_image, cv::MORPH_OPEN, structuring_element);
   }
@@ -72,13 +73,14 @@ namespace hanz {
     cv::cvtColor(input_image, gray_frame, cv::COLOR_BGR2GRAY);
     face_finder.detectMultiScale(
         gray_frame, faces, 1.1, 2, 0 | cv::CASCADE_SCALE_IMAGE, cv::Size(120, 120));
+    std::cout << "Found: " << faces.size() << " faces." << std::endl;
 
     for (size_t i = 0; i < faces.size(); ++i) {
       // Add rectangles in each detected face location
       cv::rectangle(
-          output_image,
+          input_image,
           cv::Point(faces[i].x, faces[i].y),
-          cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height),
+          cv::Point(faces[i].x + faces[i].width, faces[i].y + faces[i].height * 2),
           cv::Scalar(0, 0, 0),
           -1);
     }

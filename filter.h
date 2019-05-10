@@ -9,7 +9,7 @@ namespace hanz {
     public:
       Filter();
       ~Filter() = default;
-      cv::Mat process(cv::Mat& image) const;
+      cv::Mat process(cv::Mat& image);
       void calibrate(cv::Mat& image);
       void calculate_thresholds(cv::Mat& sample1, cv::Mat& sample2);
       void sample_skin_color(cv::Mat& image);
@@ -42,9 +42,9 @@ namespace hanz {
       static constexpr int HIGH_THRESH = 255;
       static constexpr int LOW_THRESH = 0;
       static constexpr int RECT_SIZE = 20;
-      const std::string classifier_path = "./haarcascase_frontalface_alt.xml";
+      const std::string classifier_path = "../../haarcascase_frontalface_alt.xml";
       const cv::Scalar RECT_COLOR = cv::Scalar(255, 0, 255);
 
-      void morph_image(cv::Mat binary_image, int kernel_shape, cv::Point kernel_size) const;
+      void morph_image(cv::Mat binary_image, int kernel_shape, cv::Point kernel_size);
   };
 } // namespace hanz

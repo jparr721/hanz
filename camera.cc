@@ -1,6 +1,5 @@
 #include "camera.h"
 #include "filter.h"
-#include <array>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>
@@ -8,7 +7,7 @@
 
 namespace hanz {
   int Camera::capture() {
-    const Filter f;
+    Filter f;
 
     cv::VideoCapture cap(0);
     if (!cap.isOpened()) {
@@ -22,7 +21,6 @@ namespace hanz {
     cv::Mat output_frame;
 
     bool calibrated = false;
-    std::array<cv::Mat, 2> calib_images;
     for (int i = 0;;++i) {
       cap >> frame;
       output_frame = frame.clone();
@@ -33,11 +31,8 @@ namespace hanz {
       }
 
       // We want to first calibrate our system
-      if (i < 3) {
-        calib_images[i] = frame;
-        continue;
-      } else if (i == 2) {
-        f.calculate_thresholds(calib_images[0], calib_images[1]);
+      if (i < 1) {
+        f.calibrate(frame);
         calibrated = f.is_calibrated();
         if (!calibrated) {
           throw std::runtime_error("Failed to calibrate, exiting");
@@ -46,14 +41,10 @@ namespace hanz {
         continue;
       }
 
-      // Now that our algorithm is calibrated, begin the real work
-      // First, get the skin color and isolate it
-      auto new_frame = f.process(frame);
+      // Remove the face from the frame
+      f.remove_face(frame, output_frame);
 
-      // Then, remove the face from the frame and isolate the hand
-      f.remove_face(new_frame, output_frame);
-
-      cv::imshow("Camera Feed", output_frame);
+      cv::imshow("Camera Feed", frame);
       if (cv::waitKey(10) == 27) break;
     }
 
