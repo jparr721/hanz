@@ -8,5 +8,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-g")
 
 find_package(OpenCV REQUIRED)
-add_executable(${PROJECT_NAME} filter.cc camera.cc main.cc)
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+find_package(X11 REQUIRED)
+
+include_directories(${X11_INCLUDE_DIR})
+add_executable(${PROJECT_NAME} hand.cc filter.cc camera.cc main.cc)
+target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${X11_LIBRARIES})

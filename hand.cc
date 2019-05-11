@@ -16,8 +16,7 @@ namespace hanz {
 
   void Hand::mouse_click() {
     int button = Button1;
-    auto display = std::make_unique(XOpenDisplay(nullptr));
-    /* Display *display = XOpenDisplay(nullptr); */
+    Display *display = XOpenDisplay(nullptr);
     XEvent event;
 
     if (display == nullptr) {
@@ -63,8 +62,7 @@ namespace hanz {
 
   void Hand::mouse_release() {
     int button = Button1;
-    auto display = std::make_unique(XOpenDisplay(nullptr));
-    /* Display *display = XOpenDisplay(nullptr); */
+    Display *display = XOpenDisplay(nullptr);
     XEvent event;
 
     if (display == nullptr) {
@@ -110,7 +108,7 @@ namespace hanz {
   }
 
   void move_mouse(int x, int y) {
-    auto display = std::make_unique(XOpenDisplay(0));
+    Display *display = XOpenDisplay(nullptr);
     Window root = DefaultRootWindow(display);
     XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
     XFlush(display);
