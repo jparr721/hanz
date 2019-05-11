@@ -13,14 +13,14 @@ namespace hanz {
 
   void Hand::read_gesture(int fingers, int x, int y) {
     move_mouse(x, y);
-    if (fingers < 3) {
+    if (fingers < 4) {
       mouse_click();
     } else {
       mouse_release();
     }
   }
 
-  std::pair<cv::Point, double> circle_from_points(cv::Point p1, cv::Point p2, cv::Point p3) {
+  std::pair<cv::Point, double> Hand::circle_from_points(cv::Point p1, cv::Point p2, cv::Point p3) {
     double offset = std::pow(p2.x, 2) + std::pow(p2.y, 2);
     double bc = (std::pow(p1.x, 2) + std::pow(p1.y, 2) - offset) / 2.0;
     double cd = (offset - std::pow(p3.x, 2) - std::pow(p3.y, 2)) / 2.0;
@@ -205,10 +205,10 @@ namespace hanz {
             cv::Point closest_pt = palm_points[0];
             std::vector<std::pair<double, int>> distvec;
             for (int i = 0; i < palm_points.size(); ++i) {
-              distvec.push_back(std::make_pair(euclidean_distance(rough_palm_center, palm_points[i], i);
+              distvec.push_back(std::make_pair(euclidean_distance(rough_palm_center, palm_points[i]), i));
             }
 
-            std::sort(distvec.begin(), distvec.end()):
+            std::sort(distvec.begin(), distvec.end());
 
             // Keep choosing until we find what we need
             std::pair<cv::Point, double> solution_circle;
@@ -217,26 +217,28 @@ namespace hanz {
               cv::Point p2 = palm_points[distvec[i + 1].second];
               cv::Point p3 = palm_points[distvec[i + 2].second];
               solution_circle = circle_from_points(p1, p2, p3);
-              if (solution_circle.second != 0) break;
+              if (solution_circle.second != 0) {
+                break;
+              }
             }
 
             // Find average centers to stabilize palm tracker
-            palm_centers.push_back(solution_circle);
-            if (palm_centers.size() > 10) {
-              palm_centers.erase(palm_centers.begin());
+            centers.push_back(solution_circle);
+            if (centers.size() > 10) {
+              centers.erase(centers.begin());
             }
 
             cv::Point palm_center;
             double radius = 0;
 
-            for (int i = 0; i < palm_centers.size(); ++i) {
-              palm_center += palm_centers[i].first;
-              radius += palm_centers[i].second;
+            for (int i = 0; i < centers.size(); ++i) {
+              palm_center += centers[i].first;
+              radius += centers[i].second;
             }
 
-            palm_center.x /= palm_centers.size();
-            palm_center.y /= palm_centers.size();
-            radius /= palm_centers.size();
+            palm_center.x /= centers.size();
+            palm_center.y /= centers.size();
+            radius /= centers.size();
 
             // Draw the palm center and the cirtcle into the frame
             cv::circle(frame, palm_center, 5, cv::Scalar(144, 144, 255), 3);
@@ -261,7 +263,7 @@ namespace hanz {
                   Y_dist >= 0.4 * radius &&
                   length >= 10 && ret_length >= 10 &&
                   std::max(length, ret_length)/std::min(length, ret_length) >= 0.8) {
-                if (std::min(X_dist, Y_dist) / std:max(X_dist, Y_dist) <= 0.8) {
+                if (std::min(X_dist, Y_dist) / std::max(X_dist, Y_dist) <= 0.8) {
                   if ((X_dist >= 0.1 * radius &&
                        X_dist <= 1.3 * radius &&
                        X_dist < Y_dist) ||
@@ -276,7 +278,7 @@ namespace hanz {
             }
             fingers = std::min(5, fingers);
             std::cout << "fingers: " << fingers << std::endl;
-            read_gesture(fingers, palm_center.x, palm_center.y)
+            read_gesture(fingers, palm_center.x, palm_center.y);
           }
         }
       }

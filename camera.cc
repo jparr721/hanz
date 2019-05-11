@@ -26,11 +26,11 @@ namespace hanz {
     cv::Mat frame;
     cv::Mat back;
     cv::Mat fore;
-    auto background = std::make_shared<cv::BackgroundSubtractor>;
+    cv::Ptr<cv::BackgroundSubtractorMOG2> background;
     background = cv::createBackgroundSubtractorMOG2();
 
-    background.setNMixtures(3);
-    background.setDetectShadows(false);
+    background->setNMixtures(3);
+    background->setDetectShadows(false);
     cv::namedWindow("Frame");
     cv::namedWindow("Background");
 
@@ -45,14 +45,14 @@ namespace hanz {
 
       // Begin calculating the background frames
       if (background_frame > 0) {
-        background.apply(frame, fore);
+        background->apply(frame, fore);
         --background_frame;
       } else {
-        background.apply(frame, fore, 0);
+        background->apply(frame, fore, 0);
       }
 
       // Extract the background frame
-      background.getBackgroundImage(back);
+      background->getBackgroundImage(back);
 
       // Erode and dilate the foreground
       cv::erode(fore, fore, cv::Mat());
