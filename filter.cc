@@ -66,7 +66,7 @@ namespace hanz {
     cv::morphologyEx(binary_image, binary_image, cv::MORPH_OPEN, structuring_element);
   }
 
-  void Filter::remove_face(cv::Mat& input_image, cv::Mat& output_image) {
+  void Filter::remove_face(cv::Mat& input_image) {
     std::vector<cv::Rect> faces;
     cv::Mat gray_frame;
 

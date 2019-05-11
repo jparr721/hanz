@@ -13,7 +13,7 @@ namespace hanz {
       void calibrate(cv::Mat& image);
       void calculate_thresholds(cv::Mat& sample1, cv::Mat& sample2);
       void sample_skin_color(cv::Mat& image);
-      void remove_face(cv::Mat& input_image, cv::Mat& output_image);
+      void remove_face(cv::Mat& input_image);
 
       bool is_calibrated() const { return calibrated; }
 
