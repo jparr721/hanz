@@ -8,7 +8,7 @@
 
 namespace hanz {
   double Hand::euclidean_distance(cv::Point x, cv::Point y) {
-    return std::pow((x.x - y.x), 2) + std::pow((x.y - y.y), 2);
+    return (x.x - y.x) * (x.x - y.x) + (x.y - y.y) * (x.y - y.y);
   }
 
   void Hand::read_gesture(int fingers, int x, int y) {
