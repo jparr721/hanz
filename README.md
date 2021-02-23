@@ -1,11 +1,7 @@
 # hanz
-Like the xbox kinect, but much, much shittier
-
-## Why?
-I had a week before I started work and betweem playing minecraft in my underwear and drinking wine alone in my room watching Game of Thrones I wanted to keep my hands coding on something. So I decided to make this abomination.
+Use your hand to control your screen!
 
 ## Getting Started
-If you for some reason want to use this garbage. Follow the next steps
 
 ### Prerequisites
 Currently, this has been tested only on Linux 5.09-arch1-1-ARCH
@@ -48,4 +44,4 @@ cd <BIN_DIR>
 
 #### Uninstalling
 
-To uninstall, simply execute `$ rm -r <PROJECT_ROOT>` and this will remove the files. Or simply pour 5 glasses of water on your machine.
+To uninstall, simply execute `$ rm -r <PROJECT_ROOT>` and this will remove the files.
